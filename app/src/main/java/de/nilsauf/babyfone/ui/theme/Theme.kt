@@ -14,6 +14,7 @@ import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalView
 import androidx.core.view.WindowCompat
+import io.reactivex.rxjava3.plugins.RxJavaPlugins
 
 private val DarkColorScheme = darkColorScheme(
     primary = Purple80,
@@ -44,6 +45,8 @@ fun BabyfoneTheme(
     dynamicColor: Boolean = true,
     content: @Composable () -> Unit
 ) {
+    RxJavaPlugins.setErrorHandler { }
+
     val colorScheme = when {
         dynamicColor && Build.VERSION.SDK_INT >= Build.VERSION_CODES.S -> {
             val context = LocalContext.current
