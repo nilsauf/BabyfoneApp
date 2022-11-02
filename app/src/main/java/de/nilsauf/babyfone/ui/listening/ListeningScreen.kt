@@ -1,5 +1,6 @@
 package de.nilsauf.babyfone.ui.listening
 
+import android.app.NotificationManager
 import android.media.AudioManager
 import androidx.compose.foundation.layout.Column
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -23,16 +24,19 @@ fun ListeningScreen(
     val streamingState by listeningModel.rememberStreamingState()
         .subscribeAsState(StreamingState.NotStreaming)
 
-    val audioManager = LocalContext.current.getSystemService<AudioManager>()
+    val context = LocalContext.current
+    val audioManager = context.getSystemService<AudioManager>()
+    val notificationmanager = context.getSystemService<NotificationManager>()
+
 
     var serverIpAddress by listeningModel.serverIpAddress
 
     Column {
         StateText(streamingState)
-        OutlinedTextField(serverIpAddress, {serverIpAddress = it }, enabled = streamingState == StreamingState.NotStreaming)
+        OutlinedTextField(serverIpAddress, { serverIpAddress = it }, enabled = streamingState == StreamingState.NotStreaming)
         ControlStreamButton(
             streamingState,
-            { listeningModel.stream(audioManager!! )},
+            { listeningModel.stream(audioManager!!, notificationmanager!!, context)},
             { listeningModel.stopStream() }
         )
     }
