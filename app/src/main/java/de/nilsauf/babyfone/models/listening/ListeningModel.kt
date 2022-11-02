@@ -2,6 +2,7 @@ package de.nilsauf.babyfone.models.listening
 
 import android.media.*
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.lifecycle.ViewModel
 import de.nilsauf.babyfone.data.StreamingData
@@ -21,6 +22,8 @@ class ListeningModel : ViewModel() {
 
     private val streamingDisposable = SerialDisposable()
     private val streamingStateSubject = BehaviorSubject.createDefault(StreamingState.NotStreaming)
+
+    val serverIpAddress = mutableStateOf(StreamingData.serverIpAddress)
 
     @Composable
     fun rememberStreamingState(): Observable<StreamingState> = remember {
@@ -67,7 +70,7 @@ class ListeningModel : ViewModel() {
         streamingStateSubject.onNext(StreamingState.ReadyToStream)
 
         streamingDisposable.set(
-            this.createAndObserveSocket(StreamingData.serverIpAddress, StreamingData.port, bufferSize)
+            this.createAndObserveSocket(serverIpAddress.value, StreamingData.port, bufferSize)
                 .subscribeOn(ioScheduler)
                 .doAfterNext { streamingStateSubject.onNext(StreamingState.Streaming) }
                 .filter { pair -> pair.second > 0 }
