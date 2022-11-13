@@ -119,9 +119,9 @@ class ListeningModel : ViewModel() {
     }
 
     private fun createAndObserveSocket(host: String, port: Int, bufferSize: Int): Observable<Pair<ByteArray, Int>>{
-        return Observable.using<Pair<ByteArray, Int>?, Socket?>(
+        return Observable.using<Pair<ByteArray, Int>, Socket>(
             { Socket(host, port) },
-            {socket -> Observable.create { obs ->
+            { socket -> Observable.create { obs ->
                 val stream = socket.getInputStream()
                 val buffer = ByteArray(bufferSize * 2)
                 var read = 0
