@@ -26,7 +26,7 @@ fun ListeningScreen(
 
     val context = LocalContext.current
     val audioManager = context.getSystemService<AudioManager>()
-    val notificationmanager = context.getSystemService<NotificationManager>()
+    val notificationManager = context.getSystemService<NotificationManager>()
 
 
     var serverIpAddress by listeningModel.serverIpAddress
@@ -36,7 +36,7 @@ fun ListeningScreen(
         OutlinedTextField(serverIpAddress, { serverIpAddress = it }, enabled = streamingState == StreamingState.NotStreaming)
         ControlStreamButton(
             streamingState,
-            { listeningModel.stream(audioManager!!, notificationmanager!!, context)},
+            { listeningModel.stream(audioManager!!, notificationManager!!, context)},
             { listeningModel.stopStream() }
         )
     }
