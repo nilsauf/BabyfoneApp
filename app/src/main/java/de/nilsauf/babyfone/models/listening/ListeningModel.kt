@@ -100,9 +100,9 @@ class ListeningModel : ViewModel() {
                     pair.first
                 }
                 .doFinally {
+                    streamingStateSubject.onNext(StreamingState.NotStreaming)
                     audioTrack.stop()
                     audioTrack.release()
-                    streamingStateSubject.onNext(StreamingState.NotStreaming)
                 }
                 .subscribe(),
 
@@ -151,7 +151,7 @@ class ListeningModel : ViewModel() {
             )
 
             notificationChannel.enableVibration(true)
-            notificationChannel.description = "Time for breakfast"
+            notificationChannel.description = "Listening for Babysounds"
 
             this.createNotificationChannel(notificationChannel)
         }

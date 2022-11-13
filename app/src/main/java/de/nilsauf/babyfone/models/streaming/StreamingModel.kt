@@ -92,8 +92,8 @@ class StreamingModel : ViewModel() {
                     }
                 }
                 .doFinally {
-                    if(!serverSocket.isClosed) serverSocket.close()
                     streamingStateSubject.onNext(StreamingState.NotStreaming)
+                    if(!serverSocket.isClosed) serverSocket.close()
                 }
                 .subscribe(),
 
