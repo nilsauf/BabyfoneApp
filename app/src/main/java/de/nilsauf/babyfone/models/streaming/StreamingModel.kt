@@ -1,16 +1,23 @@
 package de.nilsauf.babyfone.models.streaming
 
+import android.app.NotificationChannel
+import android.app.NotificationManager
+import android.content.Context
 import android.media.AudioRecord
 import android.media.MediaRecorder
 import android.net.ConnectivityManager
+import android.os.Build
 import androidx.annotation.RequiresPermission
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
+import androidx.core.app.NotificationCompat
 import androidx.lifecycle.ViewModel
+import de.nilsauf.babyfone.R
 import de.nilsauf.babyfone.data.StreamingData
 import de.nilsauf.babyfone.data.StreamingState
 import de.nilsauf.babyfone.extensions.getIpStringOfWifiNetwork
 import io.reactivex.rxjava3.core.Observable
+import io.reactivex.rxjava3.disposables.CompositeDisposable
 import io.reactivex.rxjava3.disposables.Disposable
 import io.reactivex.rxjava3.disposables.SerialDisposable
 import io.reactivex.rxjava3.schedulers.Schedulers
@@ -43,7 +50,7 @@ class StreamingModel : ViewModel() {
     }
 
     @RequiresPermission(value = "android.permission.RECORD_AUDIO")
-    fun stream() {
+    fun stream(notificationManager: NotificationManager, context: Context) {
         this.stopStream()
 
         val serverSocket = ServerSocket(StreamingData.port)
@@ -55,9 +62,23 @@ class StreamingModel : ViewModel() {
 
         val bufferSize = AudioRecord.getMinBufferSize(frequency, channelConfiguration, audioEncoding)
 
+        notificationManager.createChannel()
+
         streamingStateSubject.onNext(StreamingState.ReadyToStream)
 
-        this.streamingDisposable.set(
+        val compositeDisposable = CompositeDisposable()
+
+        compositeDisposable.addAll(
+            streamingStateSubject.filter { it == StreamingState.Streaming }
+                .take(1)
+                .subscribe {
+                    val builder = NotificationCompat.Builder(context, "Streaming")
+                    builder.setContentText("Streaming for Baby...")
+                        .setContentTitle("Streaming")
+                        .setSmallIcon(R.mipmap.ic_launcher_round)
+                    notificationManager.notify(101, builder.build())
+                },
+
             serverSocket.observeConnections()
                 .subscribeOn(serverSocketScheduler)
                 .take(1)
@@ -74,8 +95,14 @@ class StreamingModel : ViewModel() {
                     if(!serverSocket.isClosed) serverSocket.close()
                     streamingStateSubject.onNext(StreamingState.NotStreaming)
                 }
-                .subscribe()
+                .subscribe(),
+
+            streamingStateSubject.filter { it == StreamingState.NotStreaming }
+                .take(1)
+                .subscribe { notificationManager.cancelAll() }
         )
+
+        streamingDisposable.set(compositeDisposable)
     }
 
     fun stopStream(){
@@ -129,5 +156,20 @@ class StreamingModel : ViewModel() {
                 obs.onError(ex)
             }
         }.subscribeOn(Schedulers.io())
+    }
+
+    private fun NotificationManager.createChannel() {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            val notificationChannel = NotificationChannel(
+                "Streaming",
+                "Streaming",
+                NotificationManager.IMPORTANCE_LOW
+            )
+
+            notificationChannel.enableVibration(true)
+            notificationChannel.description = "Streaming Babysounds"
+
+            this.createNotificationChannel(notificationChannel)
+        }
     }
 }

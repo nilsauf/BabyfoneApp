@@ -2,6 +2,7 @@ package de.nilsauf.babyfone.ui.streaming
 
 import android.Manifest
 import android.annotation.SuppressLint
+import android.app.NotificationManager
 import android.net.ConnectivityManager
 import androidx.compose.foundation.layout.Column
 import androidx.compose.runtime.*
@@ -23,7 +24,10 @@ import de.nilsauf.babyfone.ui.utils.TextWithLabelInRow
 fun StreamingScreen(
     streamingModel: StreamingModel
 ){
-    val connectivityManager = LocalContext.current.getSystemService<ConnectivityManager>()
+    val context = LocalContext.current
+    val connectivityManager = context.getSystemService<ConnectivityManager>()
+    val notificationManager = context.getSystemService<NotificationManager>()
+
     val wifiIpAddresses by streamingModel.rememberWifiIpAddresses(connectivityManager!!)
         .subscribeAsState(noWifiConnectionString)
 
@@ -35,7 +39,7 @@ fun StreamingScreen(
         StateText(streamingState)
         ControlStreamButtonWithPermissionRequest(
             streamingState,
-            { streamingModel.stream() },
+            { streamingModel.stream(notificationManager!!, context) },
             { streamingModel.stopStream() })
     }
 
