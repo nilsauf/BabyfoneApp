@@ -35,7 +35,7 @@ fun ConnectivityManager.observeNetworks(request: NetworkRequest) : Observable<Li
         }
         obs.setCancellable { this.unregisterNetworkCallback(networkCallback) }
         this.registerNetworkCallback(request, networkCallback)
-    }.scan<ArrayList<Network>?>(ArrayList()){ list, (network, connected) ->
+    }.scan<ArrayList<Network>>(ArrayList()){ list, (network, connected) ->
         if(connected && !list.contains(network)){
             list.add(network)
         } else if (!connected && list.contains(network)) {
