@@ -1,5 +1,6 @@
 package de.nilsauf.babyfone.models.streaming
 
+import android.app.Notification
 import android.app.NotificationChannel
 import android.app.NotificationManager
 import android.content.Context
@@ -12,6 +13,8 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.core.app.NotificationCompat
 import androidx.lifecycle.ViewModel
+import dagger.hilt.android.lifecycle.HiltViewModel
+import dagger.hilt.android.qualifiers.ApplicationContext
 import de.nilsauf.babyfone.R
 import de.nilsauf.babyfone.data.StreamingData
 import de.nilsauf.babyfone.data.StreamingState
@@ -24,8 +27,14 @@ import io.reactivex.rxjava3.schedulers.Schedulers
 import io.reactivex.rxjava3.subjects.BehaviorSubject
 import java.net.ServerSocket
 import java.net.Socket
+import javax.inject.Inject
 
-class StreamingModel : ViewModel() {
+@HiltViewModel
+class StreamingModel @Inject constructor(
+    private val notificationManager: NotificationManager,
+    private val connectivityManager: ConnectivityManager,
+    @ApplicationContext appContext: Context
+) : ViewModel() {
 
     companion object {
         const val route = "streaming"
@@ -33,9 +42,18 @@ class StreamingModel : ViewModel() {
 
     private val streamingDisposable = SerialDisposable()
     private val streamingStateSubject = BehaviorSubject.createDefault(StreamingState.NotStreaming)
+    private val streamingNotification : Notification
+
+    init {
+        this.streamingNotification = NotificationCompat.Builder(appContext, "Streaming")
+            .setContentText("Streaming for Baby...")
+            .setContentTitle("Streaming")
+            .setSmallIcon(R.mipmap.ic_launcher_round)
+            .build()
+    }
 
     @Composable
-    fun rememberWifiIpAddresses(connectivityManager: ConnectivityManager): Observable<String> = remember {
+    fun rememberWifiIpAddresses(): Observable<String> = remember {
         connectivityManager
             .getIpStringOfWifiNetwork()
             .onErrorComplete()
@@ -50,7 +68,7 @@ class StreamingModel : ViewModel() {
     }
 
     @RequiresPermission(value = "android.permission.RECORD_AUDIO")
-    fun stream(notificationManager: NotificationManager, context: Context) {
+    fun stream() {
         this.stopStream()
 
         val serverSocket = ServerSocket(StreamingData.port)
@@ -72,11 +90,7 @@ class StreamingModel : ViewModel() {
             streamingStateSubject.filter { it == StreamingState.Streaming }
                 .take(1)
                 .subscribe {
-                    val builder = NotificationCompat.Builder(context, "Streaming")
-                    builder.setContentText("Streaming for Baby...")
-                        .setContentTitle("Streaming")
-                        .setSmallIcon(R.mipmap.ic_launcher_round)
-                    notificationManager.notify(101, builder.build())
+                    notificationManager.notify(101, this.streamingNotification)
                 },
 
             serverSocket.observeConnections()
