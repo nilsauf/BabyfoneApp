@@ -53,7 +53,7 @@ class StreamingModel @Inject constructor(
     }
 
     @Composable
-    fun rememberWifiIpAddresses(): Observable<String> = remember {
+    fun rememberWifiIpAddresses(): Observable<String> = remember(connectivityManager) {
         connectivityManager
             .getIpStringOfWifiNetwork()
             .onErrorComplete()
@@ -62,7 +62,7 @@ class StreamingModel @Inject constructor(
     }
 
     @Composable
-    fun rememberStreamingState(): Observable<StreamingState> = remember {
+    fun rememberStreamingState(): Observable<StreamingState> = remember(streamingStateSubject) {
         streamingStateSubject
             .distinctUntilChanged()
     }
