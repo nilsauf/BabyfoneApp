@@ -64,6 +64,7 @@ fun ConnectivityManager.getIpStringOfObservedNetworks(request: NetworkRequest ):
                     .map { linkAdd -> linkAdd.joinToString("\n") }
             }
         }
+        .onErrorComplete()
 }
 
 fun ConnectivityManager.getIpStringOfWifiNetwork() : Observable<String> {
