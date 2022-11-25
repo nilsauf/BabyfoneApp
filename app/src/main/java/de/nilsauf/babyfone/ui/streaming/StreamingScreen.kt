@@ -20,10 +20,10 @@ import de.nilsauf.babyfone.ui.utils.TextWithLabelInRow
 fun StreamingScreen(
     streamingModel: StreamingModel
 ){
-    val wifiIpAddresses by streamingModel.rememberWifiIpAddresses()
+    val wifiIpAddresses by remember(streamingModel){ streamingModel.wifiIpAddresses }
         .subscribeAsState(noWifiConnectionString)
 
-    val streamingState by streamingModel.rememberStreamingState()
+    val streamingState by streamingModel.streamingStateSubject
         .subscribeAsState(StreamingState.NotStreaming)
 
     Column {
