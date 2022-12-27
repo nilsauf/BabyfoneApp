@@ -10,8 +10,9 @@ import dagger.hilt.components.SingletonComponent
 import de.nilsauf.babyfone.data.StreamingData
 import de.nilsauf.babyfone.extensions.observeConnections
 import de.nilsauf.babyfone.models.streaming.BabyfoneAudioRecordData
-import de.nilsauf.babyfone.models.streaming.BabyfoneStreamWriter
+import de.nilsauf.babyfone.models.streaming.streamwriter.BaseStreamWriter
 import de.nilsauf.babyfone.models.streaming.StreamType
+import de.nilsauf.babyfone.models.streaming.streamwriter.OutputStreamWriter
 import io.reactivex.rxjava3.core.Observable
 import io.reactivex.rxjava3.core.Scheduler
 import io.reactivex.rxjava3.kotlin.cast
@@ -23,7 +24,7 @@ import java.net.ServerSocket
 object BabyfoneModule {
 
     @Provides
-    fun provideServerStream() : Observable<BabyfoneStreamWriter> {
+    fun provideServerStream() : Observable<BaseStreamWriter> {
         val streamType = StreamType.Socket
         return when (streamType) {
             StreamType.Socket -> this.createTcpStream()
@@ -31,7 +32,7 @@ object BabyfoneModule {
         }
     }
 
-    private fun createTcpStream() : Observable<BabyfoneStreamWriter> {
+    private fun createTcpStream() : Observable<BaseStreamWriter> {
         val serverSocket = ServerSocket(StreamingData.port)
         val serverSocketScheduler = Schedulers.io()
 
@@ -39,7 +40,7 @@ object BabyfoneModule {
             .subscribeOn(serverSocketScheduler)
             .take(1)
             .map { socket -> socket.getOutputStream() }
-            .map { stream -> BabyfoneStreamWriter(stream, serverSocketScheduler)}
+            .map { stream -> OutputStreamWriter(stream, serverSocketScheduler) }
             .doFinally {
                 if(!serverSocket.isClosed)
                     serverSocket.close()

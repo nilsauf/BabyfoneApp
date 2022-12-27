@@ -8,6 +8,7 @@ import dagger.hilt.android.qualifiers.ApplicationContext
 import de.nilsauf.babyfone.R
 import de.nilsauf.babyfone.data.StreamingState
 import de.nilsauf.babyfone.extensions.createStreamingChannel
+import de.nilsauf.babyfone.models.streaming.streamwriter.BaseStreamWriter
 import io.reactivex.rxjava3.core.Observable
 import io.reactivex.rxjava3.disposables.CompositeDisposable
 import io.reactivex.rxjava3.disposables.Disposable
@@ -20,7 +21,7 @@ import javax.inject.Singleton
 @Singleton
 class AudioStreamHandler @Inject constructor(
     private val notificationManager: NotificationManager,
-    private val serverStreamFactory: Provider<Observable<BabyfoneStreamWriter>>,
+    private val serverStreamFactory: Provider<Observable<BaseStreamWriter>>,
     private val audioRecordDataFactory: Provider<Observable<BabyfoneAudioRecordData>>,
     @ApplicationContext appContext: Context
 ) {
