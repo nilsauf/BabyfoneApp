@@ -5,8 +5,8 @@ import androidx.compose.ui.Modifier
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
-import de.nilsauf.babyfone.models.listening.ListeningModel
-import de.nilsauf.babyfone.models.streaming.StreamingModel
+import de.nilsauf.babyfone.ui.listening.ListeningModel
+import de.nilsauf.babyfone.ui.streaming.StreamingModel
 import de.nilsauf.babyfone.ui.listening.ListeningScreen
 import de.nilsauf.babyfone.ui.start.StartScreen
 import de.nilsauf.babyfone.ui.start.startRoute

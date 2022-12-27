@@ -11,8 +11,8 @@ import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.compose.rememberNavController
 import de.nilsauf.babyfone.BabyfoneNavHost
-import de.nilsauf.babyfone.models.listening.ListeningModel
-import de.nilsauf.babyfone.models.streaming.StreamingModel
+import de.nilsauf.babyfone.ui.listening.ListeningModel
+import de.nilsauf.babyfone.ui.streaming.StreamingModel
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable

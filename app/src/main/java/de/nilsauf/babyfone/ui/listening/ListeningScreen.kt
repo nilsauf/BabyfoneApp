@@ -8,7 +8,6 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.rxjava3.subscribeAsState
 import androidx.compose.runtime.setValue
 import de.nilsauf.babyfone.data.StreamingState
-import de.nilsauf.babyfone.models.listening.ListeningModel
 import de.nilsauf.babyfone.ui.utils.ControlStreamButton
 import de.nilsauf.babyfone.ui.utils.StateText
 

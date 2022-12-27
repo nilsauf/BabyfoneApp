@@ -1,4 +1,4 @@
-package de.nilsauf.babyfone.models.streaming
+package de.nilsauf.babyfone.ui.streaming
 
 import android.net.ConnectivityManager
 import androidx.annotation.RequiresPermission
@@ -6,6 +6,7 @@ import androidx.lifecycle.ViewModel
 import dagger.hilt.android.lifecycle.HiltViewModel
 import de.nilsauf.babyfone.data.StreamingState
 import de.nilsauf.babyfone.extensions.getIpStringOfWifiNetwork
+import de.nilsauf.babyfone.models.streaming.AudioStreamHandler
 import io.reactivex.rxjava3.core.Observable
 import javax.inject.Inject
 

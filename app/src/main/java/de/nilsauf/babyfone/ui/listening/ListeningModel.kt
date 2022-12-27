@@ -1,4 +1,4 @@
-package de.nilsauf.babyfone.models.listening
+package de.nilsauf.babyfone.ui.listening
 
 import android.app.Notification
 import android.app.NotificationChannel

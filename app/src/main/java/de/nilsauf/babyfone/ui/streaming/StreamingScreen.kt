@@ -10,7 +10,6 @@ import com.google.accompanist.permissions.isGranted
 import com.google.accompanist.permissions.rememberPermissionState
 import de.nilsauf.babyfone.data.StreamingState
 import de.nilsauf.babyfone.extensions.noWifiConnectionString
-import de.nilsauf.babyfone.models.streaming.StreamingModel
 import de.nilsauf.babyfone.ui.utils.ControlStreamButton
 import de.nilsauf.babyfone.ui.utils.StateText
 import de.nilsauf.babyfone.ui.utils.TextWithLabelInRow
