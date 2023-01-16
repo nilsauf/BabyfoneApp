@@ -12,7 +12,3 @@ class StreamingData {
         const val serverIpAddress = "192.168.178.20"
     }
 }
-
-enum class StreamingState {
-    NotStreaming, ReadyToStream, Streaming
-}
