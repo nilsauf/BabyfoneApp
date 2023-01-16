@@ -1,7 +1,9 @@
 package de.nilsauf.babyfone.models.preferences
 
 import android.content.Context
+import android.media.AudioFormat
 import androidx.datastore.preferences.core.Preferences
+import androidx.datastore.preferences.core.intPreferencesKey
 import androidx.datastore.preferences.core.stringPreferencesKey
 import dagger.hilt.android.qualifiers.ApplicationContext
 import io.reactivex.rxjava3.core.Observable
@@ -19,18 +21,64 @@ private val Context.dataStore by rxPreferencesDataStore("settings", scheduler = 
 class DataStoreManager @Inject constructor(@ApplicationContext appContext: Context) {
 
     private val settingsDataStore = appContext.dataStore
-    private val lastAddressString = stringPreferencesKey("lastAddress")
+    private val serverIpAddressKey = stringPreferencesKey("serverIpAddress")
+    private val serverPortKey = intPreferencesKey("serverPort")
+    private val frequencyKey = intPreferencesKey("frequencyKey")
+    private val channelConfigurationInKey = intPreferencesKey("channelConfigurationIn")
+    private val channelConfigurationOutKey = intPreferencesKey("channelConfigurationOut")
+    private val audioEncodingKey = intPreferencesKey("audioEncoding")
 
-    fun setLastAddressString(lastAddress: String) : Single<Unit> {
-        return this.setSetting(lastAddressString, lastAddress)
+    fun setServerIpAddress(lastAddress: String) : Single<Unit> {
+        return this.setSetting(serverIpAddressKey, lastAddress)
     }
 
-    fun connectLastStreamAddress() : Observable<String> {
-        return this.connectToSetting(lastAddressString, "0.0.0.0")
+    fun connectToServerIpAddress() : Observable<String> {
+        return this.connectToSetting(serverIpAddressKey, "0.0.0.0")
+    }
+
+    fun setServerPort(serverPort: Int) : Single<Unit> {
+        return this.setSetting(serverPortKey, serverPort)
+    }
+
+    fun connectToServerPort() : Observable<Int> {
+        return this.connectToSetting(serverPortKey, 10000)
+    }
+
+    fun setFrequency(frequency: Int) : Single<Unit> {
+        return this.setSetting(frequencyKey, frequency)
+    }
+
+    fun connectToFrequency() : Observable<Int> {
+        return this.connectToSetting(frequencyKey, 44100)
+    }
+
+    fun setChannelConfigurationIn(channelConfigurationIn: Int) : Single<Unit> {
+        return this.setSetting(channelConfigurationInKey, channelConfigurationIn)
+    }
+
+    fun connectToChannelConfigurationIn() : Observable<Int> {
+        return this.connectToSetting(channelConfigurationInKey, AudioFormat.CHANNEL_IN_MONO)
+    }
+
+    fun setChannelConfigurationOut(channelConfigurationOut: Int) : Single<Unit> {
+        return this.setSetting(channelConfigurationOutKey, channelConfigurationOut)
+    }
+
+    fun connectToChannelConfigurationOut() : Observable<Int> {
+        return this.connectToSetting(channelConfigurationOutKey, AudioFormat.CHANNEL_OUT_MONO)
+    }
+
+    fun setAudioEncoding(audioEncoding: Int) : Single<Unit> {
+        return this.setSetting(audioEncodingKey, audioEncoding)
+    }
+
+    fun connectToAudioEncoding() : Observable<Int> {
+        return this.connectToSetting(audioEncodingKey, AudioFormat.ENCODING_PCM_16BIT)
     }
 
     private fun <T : Any> connectToSetting(key: Preferences.Key<T>, defaultValue: T) : Observable<T> {
         return settingsDataStore.data().map { preferences -> preferences[key] ?: defaultValue }
+            .distinctUntilChanged()
             .toObservable()
     }
     
