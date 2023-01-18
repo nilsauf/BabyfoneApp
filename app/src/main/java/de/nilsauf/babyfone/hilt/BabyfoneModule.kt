@@ -10,6 +10,7 @@ import dagger.hilt.components.SingletonComponent
 import de.nilsauf.babyfone.data.StreamingData
 import de.nilsauf.babyfone.extensions.observeConnections
 import de.nilsauf.babyfone.models.preferences.DataStoreManager
+import de.nilsauf.babyfone.models.streaming.AudioRecordConfigurationData
 import de.nilsauf.babyfone.models.streaming.BabyfoneAudioRecordData
 import de.nilsauf.babyfone.models.streaming.streamwriter.BaseStreamWriter
 import de.nilsauf.babyfone.models.streaming.StreamType
@@ -48,8 +49,6 @@ object BabyfoneModule {
             }
             .cast()
     }
-
-    private data class AudioRecordConfigurationData(val audioSource: Int, val frequency: Int, val channelConfig: Int, val audioEncoding: Int, val bufferSize: Int)
 
     @Provides
     @RequiresPermission(value = "android.permission.RECORD_AUDIO")

@@ -19,3 +19,5 @@ data class BabyfoneAudioRecordData(val Data: ByteArray, val Length: Int) {
         return result
     }
 }
+
+data class AudioRecordConfigurationData(val audioSource: Int, val frequency: Int, val channelConfig: Int, val audioEncoding: Int, val bufferSize: Int)
