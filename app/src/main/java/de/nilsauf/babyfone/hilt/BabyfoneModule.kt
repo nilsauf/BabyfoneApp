@@ -9,6 +9,7 @@ import dagger.hilt.InstallIn
 import dagger.hilt.components.SingletonComponent
 import de.nilsauf.babyfone.data.StreamingData
 import de.nilsauf.babyfone.extensions.observeConnections
+import de.nilsauf.babyfone.models.preferences.DataStoreManager
 import de.nilsauf.babyfone.models.streaming.BabyfoneAudioRecordData
 import de.nilsauf.babyfone.models.streaming.streamwriter.BaseStreamWriter
 import de.nilsauf.babyfone.models.streaming.StreamType
@@ -48,50 +49,51 @@ object BabyfoneModule {
             .cast()
     }
 
+    private data class AudioRecordConfigurationData(val audioSource: Int, val frequency: Int, val channelConfig: Int, val audioEncoding: Int, val bufferSize: Int)
+
     @Provides
     @RequiresPermission(value = "android.permission.RECORD_AUDIO")
-    fun provideAudioRecordObservable() : Observable<BabyfoneAudioRecordData> {
-        val frequency = StreamingData.frequency
-        val channelConfiguration = StreamingData.channelInConfiguration
-        val audioEncoding = StreamingData.audioEncoding
-
-        val bufferSize = AudioRecord.getMinBufferSize(frequency, channelConfiguration, audioEncoding)
-
-        return createAndConnectToAudioRecord(
-            MediaRecorder.AudioSource.MIC,
-            frequency,
-            channelConfiguration,
-            audioEncoding,
-            bufferSize)
+    fun provideAudioRecordObservable(dataStoreManager: DataStoreManager) : Observable<BabyfoneAudioRecordData> {
+        return Observable.combineLatest(
+            dataStoreManager.connectToFrequency(),
+            dataStoreManager.connectToChannelConfigurationIn(),
+            dataStoreManager.connectToAudioEncoding()
+            ) { frequency, channelConfig, audioEncoding ->
+                AudioRecordConfigurationData(
+                    MediaRecorder.AudioSource.MIC,
+                    frequency,
+                    channelConfig,
+                    audioEncoding,
+                    AudioRecord.getMinBufferSize(frequency, channelConfig, audioEncoding)
+                )
+            }
+            .take(1)
+            .flatMap { createAndConnectToAudioRecord(it) }
     }
 
     @RequiresPermission(value = "android.permission.RECORD_AUDIO")
     private fun createAndConnectToAudioRecord(
-        audioSource : Int,
-        sampleRateInHz : Int,
-        channelConfig : Int,
-        audioFormat : Int,
-        bufferSizeInBytes : Int,
+        audioRecordConfigurationData: AudioRecordConfigurationData,
         scheduler: Scheduler = Schedulers.computation()
     ): Observable<BabyfoneAudioRecordData> {
         return Observable.using<BabyfoneAudioRecordData, AudioRecord>(
             {
                 AudioRecord(
-                    audioSource,
-                    sampleRateInHz,
-                    channelConfig,
-                    audioFormat,
-                    bufferSizeInBytes)
+                    audioRecordConfigurationData.audioSource,
+                    audioRecordConfigurationData.frequency,
+                    audioRecordConfigurationData.channelConfig,
+                    audioRecordConfigurationData.audioEncoding,
+                    audioRecordConfigurationData.bufferSize)
             },
             {
-                val byteBufferSize = bufferSizeInBytes * 2
+                val byteBufferSize = audioRecordConfigurationData.bufferSize * 2
                 val buffer = ByteArray(byteBufferSize)
                 it.startRecording()
 
                 Observable.create { obs ->
                     try {
                         while(!obs.isDisposed) {
-                            val read = it.read(buffer, 0, bufferSizeInBytes)
+                            val read = it.read(buffer, 0, audioRecordConfigurationData.bufferSize)
                             obs.onNext(BabyfoneAudioRecordData(buffer.clone(), read))
                         }
                         obs.onComplete()
