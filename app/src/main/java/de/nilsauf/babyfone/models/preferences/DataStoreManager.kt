@@ -8,6 +8,7 @@ import androidx.datastore.preferences.core.stringPreferencesKey
 import dagger.hilt.android.qualifiers.ApplicationContext
 import io.reactivex.rxjava3.core.Observable
 import androidx.datastore.preferences.rxjava3.rxPreferencesDataStore
+import de.nilsauf.babyfone.models.streaming.StreamType
 import io.reactivex.rxjava3.core.Single
 import io.reactivex.rxjava3.schedulers.Schedulers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -27,6 +28,7 @@ class DataStoreManager @Inject constructor(@ApplicationContext appContext: Conte
     private val channelConfigurationInKey = intPreferencesKey("channelConfigurationIn")
     private val channelConfigurationOutKey = intPreferencesKey("channelConfigurationOut")
     private val audioEncodingKey = intPreferencesKey("audioEncoding")
+    private val streamTypeKey = stringPreferencesKey("streamType")
 
     fun setServerIpAddress(lastAddress: String) : Single<Unit> {
         return this.setSetting(serverIpAddressKey, lastAddress)
@@ -74,6 +76,15 @@ class DataStoreManager @Inject constructor(@ApplicationContext appContext: Conte
 
     fun connectToAudioEncoding() : Observable<Int> {
         return this.connectToSetting(audioEncodingKey, AudioFormat.ENCODING_PCM_16BIT)
+    }
+
+    fun setStreamType(streamType: StreamType) : Single<Unit> {
+        return this.setSetting(streamTypeKey, streamType.name)
+    }
+
+    fun connectToStreamType() : Observable<StreamType> {
+        return this.connectToSetting(streamTypeKey, StreamType.Socket.name)
+            .map { StreamType.valueOf(it) }
     }
 
     private fun <T : Any> connectToSetting(key: Preferences.Key<T>, defaultValue: T) : Observable<T> {
