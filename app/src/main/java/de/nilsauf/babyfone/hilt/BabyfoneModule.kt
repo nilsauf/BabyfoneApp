@@ -7,7 +7,6 @@ import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
 import dagger.hilt.components.SingletonComponent
-import de.nilsauf.babyfone.data.StreamingData
 import de.nilsauf.babyfone.extensions.observeConnections
 import de.nilsauf.babyfone.models.preferences.DataStoreManager
 import de.nilsauf.babyfone.models.streaming.AudioRecordConfigurationData
@@ -26,27 +25,35 @@ import java.net.ServerSocket
 object BabyfoneModule {
 
     @Provides
-    fun provideServerStream() : Observable<BaseStreamWriter> {
-        val streamType = StreamType.Socket
-        return when (streamType) {
-            StreamType.Socket -> this.createTcpStream()
-            StreamType.WebSocket -> throw NotImplementedError("Web Socket not yet implemented")
-        }
+    fun provideServerStream(dataStoreManager: DataStoreManager) : Observable<BaseStreamWriter> {
+        return dataStoreManager.connectToStreamType()
+            .firstElement()
+            .flatMapObservable {
+                when (it) {
+                    StreamType.Socket -> this.createTcpStream(dataStoreManager)
+                    StreamType.WebSocket -> throw NotImplementedError("Web Socket not yet implemented")
+                }
+            }
     }
 
-    private fun createTcpStream() : Observable<BaseStreamWriter> {
-        val serverSocket = ServerSocket(StreamingData.port)
+    private fun createTcpStream(dataStoreManager: DataStoreManager) : Observable<BaseStreamWriter> {
         val serverSocketScheduler = Schedulers.io()
 
-        return serverSocket.observeConnections()
-            .subscribeOn(serverSocketScheduler)
-            .take(1)
-            .map { socket -> socket.getOutputStream() }
-            .map { stream -> OutputStreamWriter(stream, serverSocketScheduler) }
-            .doFinally {
-                if(!serverSocket.isClosed)
-                    serverSocket.close()
+        return dataStoreManager.connectToServerPort()
+            .firstElement()
+            .map { ServerSocket(it) }
+            .flatMap {
+                it.observeConnections()
+                    .subscribeOn(serverSocketScheduler)
+                    .firstElement()
+                    .map { socket -> socket.getOutputStream() }
+                    .map { stream -> OutputStreamWriter(stream, serverSocketScheduler) }
+                    .doFinally {
+                        if (!it.isClosed)
+                            it.close()
+                    }
             }
+            .toObservable()
             .cast()
     }
 
