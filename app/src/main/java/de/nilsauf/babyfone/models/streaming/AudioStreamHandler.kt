@@ -54,7 +54,7 @@ class AudioStreamHandler @Inject constructor(
 
         compositeDisposable.addAll(
             streamingState.filter { it == StreamingState.Streaming }
-                .take(1)
+                .firstElement()
                 .subscribe {
                     notificationManager.notify(101, this.streamingNotification)
                 },
@@ -70,7 +70,7 @@ class AudioStreamHandler @Inject constructor(
                 .subscribe(),
 
             streamingState.filter { it == StreamingState.NotStreaming }
-                .take(1)
+                .firstElement()
                 .subscribe { notificationManager.cancelAll() }
         )
 
