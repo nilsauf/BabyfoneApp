@@ -22,7 +22,7 @@ import java.net.ServerSocket
 
 @Module
 @InstallIn(SingletonComponent::class)
-object BabyfoneModule {
+object StreamingModule {
 
     @Provides
     fun provideServerStream(dataStoreManager: DataStoreManager) : Observable<BaseStreamWriter> {
