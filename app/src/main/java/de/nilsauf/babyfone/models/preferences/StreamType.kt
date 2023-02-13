@@ -1,4 +1,4 @@
-package de.nilsauf.babyfone.models.streaming
+package de.nilsauf.babyfone.models.preferences
 
 enum class StreamType {
     Socket,

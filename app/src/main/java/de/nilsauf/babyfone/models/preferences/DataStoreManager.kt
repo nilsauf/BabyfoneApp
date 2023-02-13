@@ -8,7 +8,6 @@ import androidx.datastore.preferences.core.stringPreferencesKey
 import dagger.hilt.android.qualifiers.ApplicationContext
 import io.reactivex.rxjava3.core.Observable
 import androidx.datastore.preferences.rxjava3.rxPreferencesDataStore
-import de.nilsauf.babyfone.models.streaming.StreamType
 import io.reactivex.rxjava3.core.Single
 import io.reactivex.rxjava3.schedulers.Schedulers
 import kotlinx.coroutines.ExperimentalCoroutinesApi

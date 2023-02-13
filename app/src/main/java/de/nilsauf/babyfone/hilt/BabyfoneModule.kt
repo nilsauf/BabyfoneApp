@@ -12,7 +12,7 @@ import de.nilsauf.babyfone.models.preferences.DataStoreManager
 import de.nilsauf.babyfone.models.streaming.AudioRecordConfigurationData
 import de.nilsauf.babyfone.models.streaming.BabyfoneAudioRecordData
 import de.nilsauf.babyfone.models.streaming.streamwriter.BaseStreamWriter
-import de.nilsauf.babyfone.models.streaming.StreamType
+import de.nilsauf.babyfone.models.preferences.StreamType
 import de.nilsauf.babyfone.models.streaming.streamwriter.OutputStreamWriter
 import io.reactivex.rxjava3.core.Observable
 import io.reactivex.rxjava3.core.Scheduler
