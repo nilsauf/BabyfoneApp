@@ -19,7 +19,7 @@ import javax.inject.Provider
 import javax.inject.Singleton
 
 @Singleton
-class AudioStreamHandler @Inject constructor(
+class AudioStreamingHandler @Inject constructor(
     private val notificationManager: NotificationManager,
     private val serverStreamFactory: Provider<Observable<BaseStreamWriter>>,
     private val audioRecordDataFactory: Provider<Observable<BabyfoneAudioRecordData>>,
