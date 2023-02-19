@@ -3,6 +3,7 @@ package de.nilsauf.babyfone.models.preferences
 import android.content.Context
 import android.media.AudioFormat
 import androidx.datastore.preferences.core.Preferences
+import androidx.datastore.preferences.core.floatPreferencesKey
 import androidx.datastore.preferences.core.intPreferencesKey
 import androidx.datastore.preferences.core.stringPreferencesKey
 import dagger.hilt.android.qualifiers.ApplicationContext
@@ -28,6 +29,7 @@ class DataStoreManager @Inject constructor(@ApplicationContext appContext: Conte
     private val channelConfigurationOutKey = intPreferencesKey("channelConfigurationOut")
     private val audioEncodingKey = intPreferencesKey("audioEncoding")
     private val streamTypeKey = stringPreferencesKey("streamType")
+    private val audioVolumeKey = floatPreferencesKey("audioVolume")
 
     fun setServerIpAddress(lastAddress: String) : Single<Unit> {
         return this.setSetting(serverIpAddressKey, lastAddress)
@@ -84,6 +86,14 @@ class DataStoreManager @Inject constructor(@ApplicationContext appContext: Conte
     fun connectToStreamType() : Observable<StreamType> {
         return this.connectToSetting(streamTypeKey, StreamType.Socket.name)
             .map { StreamType.valueOf(it) }
+    }
+
+    fun setAudioVolume(audioVolume : Float) : Single<Unit> {
+        return this.setSetting(audioVolumeKey, audioVolume)
+    }
+
+    fun connectToAudioVolume() : Observable<Float> {
+        return this.connectToSetting(audioVolumeKey, 3.0F)
     }
 
     private fun <T : Any> connectToSetting(key: Preferences.Key<T>, defaultValue: T) : Observable<T> {
