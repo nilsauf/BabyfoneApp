@@ -6,16 +6,15 @@ import androidx.datastore.preferences.core.Preferences
 import androidx.datastore.preferences.core.floatPreferencesKey
 import androidx.datastore.preferences.core.intPreferencesKey
 import androidx.datastore.preferences.core.stringPreferencesKey
+import androidx.datastore.preferences.rxjava3.rxPreferencesDataStore
 import dagger.hilt.android.qualifiers.ApplicationContext
 import io.reactivex.rxjava3.core.Observable
-import androidx.datastore.preferences.rxjava3.rxPreferencesDataStore
 import io.reactivex.rxjava3.core.Single
-import io.reactivex.rxjava3.schedulers.Schedulers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import javax.inject.Inject
 import javax.inject.Singleton
 
-private val Context.dataStore by rxPreferencesDataStore("settings", scheduler = Schedulers.io())
+private val Context.dataStore by rxPreferencesDataStore("settings")
 
 @Singleton
 @OptIn(ExperimentalCoroutinesApi::class)
@@ -97,16 +96,18 @@ class DataStoreManager @Inject constructor(@ApplicationContext appContext: Conte
     }
 
     private fun <T : Any> connectToSetting(key: Preferences.Key<T>, defaultValue: T) : Observable<T> {
-        return settingsDataStore.data().map { preferences -> preferences[key] ?: defaultValue }
+        return settingsDataStore.data()
+            .map { preferences -> preferences[key] ?: defaultValue }
             .distinctUntilChanged()
             .toObservable()
     }
     
     private fun <T> setSetting(key: Preferences.Key<T>, newValue: T) : Single<Unit> {
-        return settingsDataStore.updateDataAsync{ preferences ->
-            preferences.toMutablePreferences()[key] = newValue
-            Single.just(preferences)
-        }.map { }
+        return settingsDataStore.updateDataAsync { preferences ->
+            val mutPref = preferences.toMutablePreferences()
+            mutPref[key] = newValue
+            Single.just(mutPref)
+        }
+            .map { }
     }
-
 }
