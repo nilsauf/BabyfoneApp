@@ -12,7 +12,7 @@ fun ServerSocket.observeConnections(scheduler: Scheduler = Schedulers.io()): Obs
             while(!obs.isDisposed && !this.isClosed){
                 obs.onNext(this.accept())
             }
-            if (this.isClosed)
+            if (!obs.isDisposed)
                 obs.onComplete()
         } catch (ex: Exception){
             obs.onError(ex)
