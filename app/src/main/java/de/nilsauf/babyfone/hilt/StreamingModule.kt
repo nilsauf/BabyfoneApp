@@ -1,18 +1,18 @@
 package de.nilsauf.babyfone.hilt
 
 import android.media.AudioRecord
-import android.media.MediaRecorder
 import androidx.annotation.RequiresPermission
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
 import dagger.hilt.components.SingletonComponent
+import de.nilsauf.babyfone.extensions.connectToAudioRecordConfigurationData
 import de.nilsauf.babyfone.extensions.observeConnections
 import de.nilsauf.babyfone.models.preferences.DataStoreManager
+import de.nilsauf.babyfone.models.preferences.StreamType
 import de.nilsauf.babyfone.models.streaming.AudioRecordConfigurationData
 import de.nilsauf.babyfone.models.streaming.BabyfoneAudioRecordData
 import de.nilsauf.babyfone.models.streaming.streamwriter.BaseStreamWriter
-import de.nilsauf.babyfone.models.preferences.StreamType
 import de.nilsauf.babyfone.models.streaming.streamwriter.OutputStreamWriter
 import io.reactivex.rxjava3.core.Observable
 import io.reactivex.rxjava3.core.Scheduler
@@ -49,8 +49,7 @@ object StreamingModule {
                     .map { socket -> socket.getOutputStream() }
                     .map { stream -> OutputStreamWriter(stream, serverSocketScheduler) }
                     .doFinally {
-                        if (!it.isClosed)
-                            it.close()
+                        it.close()
                     }
             }
             .toObservable()
@@ -60,21 +59,9 @@ object StreamingModule {
     @Provides
     @RequiresPermission(value = "android.permission.RECORD_AUDIO")
     fun provideAudioRecordObservable(dataStoreManager: DataStoreManager) : Observable<BabyfoneAudioRecordData> {
-        return Observable.combineLatest(
-            dataStoreManager.connectToFrequency(),
-            dataStoreManager.connectToChannelConfigurationIn(),
-            dataStoreManager.connectToAudioEncoding()
-            ) { frequency, channelConfig, audioEncoding ->
-                AudioRecordConfigurationData(
-                    MediaRecorder.AudioSource.MIC,
-                    frequency,
-                    channelConfig,
-                    audioEncoding,
-                    AudioRecord.getMinBufferSize(frequency, channelConfig, audioEncoding)
-                )
-            }
-            .take(1)
-            .flatMap { createAndConnectToAudioRecord(it) }
+        return dataStoreManager.connectToAudioRecordConfigurationData()
+            .firstElement()
+            .flatMapObservable { createAndConnectToAudioRecord(it) }
     }
 
     @RequiresPermission(value = "android.permission.RECORD_AUDIO")
