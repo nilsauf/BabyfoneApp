@@ -3,10 +3,8 @@ package de.nilsauf.babyfone.ui.listening
 import androidx.compose.foundation.layout.Column
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.OutlinedTextField
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
+import androidx.compose.runtime.*
 import androidx.compose.runtime.rxjava3.subscribeAsState
-import androidx.compose.runtime.setValue
 import de.nilsauf.babyfone.data.StreamingState
 import de.nilsauf.babyfone.ui.utils.ControlStreamButton
 import de.nilsauf.babyfone.ui.utils.StateText
@@ -16,17 +14,20 @@ import de.nilsauf.babyfone.ui.utils.StateText
 fun ListeningScreen(
     listeningModel: ListeningModel
 ){
-    val streamingState by listeningModel.rememberStreamingState()
+    val streamingState by listeningModel.streamingStateSubject
         .subscribeAsState(StreamingState.NotStreaming)
 
-    var serverIpAddress by listeningModel.serverIpAddress
+    var serverIpAddress by remember { listeningModel.serverIpAddress }
 
     Column {
         StateText(streamingState)
-        OutlinedTextField(serverIpAddress, { serverIpAddress = it }, enabled = streamingState == StreamingState.NotStreaming)
+        OutlinedTextField(
+            serverIpAddress,
+            { serverIpAddress = it },
+            enabled = streamingState == StreamingState.NotStreaming)
         ControlStreamButton(
             streamingState,
-            { listeningModel.stream()},
+            { listeningModel.stream() },
             { listeningModel.stopStream() }
         )
     }
