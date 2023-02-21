@@ -2,6 +2,7 @@ package de.nilsauf.babyfone.models.streaming
 
 import android.app.NotificationManager
 import android.content.Context
+import android.widget.Toast
 import androidx.annotation.RequiresPermission
 import androidx.core.app.NotificationCompat
 import dagger.hilt.android.qualifiers.ApplicationContext
@@ -23,7 +24,7 @@ class AudioStreamingHandler @Inject constructor(
     private val notificationManager: NotificationManager,
     private val serverStreamFactory: Provider<Observable<BaseStreamWriter>>,
     private val audioRecordDataFactory: Provider<Observable<BabyfoneAudioRecordData>>,
-    @ApplicationContext appContext: Context
+    @ApplicationContext private val appContext: Context
 ) {
     private val streamingDisposable = SerialDisposable()
     private val streamingStateSubject = BehaviorSubject.createDefault(StreamingState.NotStreaming)
@@ -66,6 +67,7 @@ class AudioStreamingHandler @Inject constructor(
                     .map { recordData -> streamWriter.write(recordData.Data, recordData.Length) }
                 }
                 .doFinally { streamingStateSubject.onNext(StreamingState.NotStreaming) }
+                .doOnError { throwable -> Toast.makeText(appContext, throwable.message, Toast.LENGTH_SHORT).show() }
                 .onErrorComplete()
                 .subscribe(),
 
